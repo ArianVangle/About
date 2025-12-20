@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arian Semenov</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050505;
+            --card-bg: #0f0f0f;
+            --card-hover: #161616;
+            --border: rgba(255, 255, 255, 0.08);
+            --text-main: #f0f0f0;
+            --text-muted: #808080;
+            --accent: #3b82f6; 
+            --accent-glow: rgba(59, 130, 246, 0.15);
+        }
+
+        /* TEXTURE GRAIN OVERLAY */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+
+        /* HEADER & HERO */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 60px;
+        }
+
+        .brand {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: -1px;
+            color: #fff;
+        }
+
+        .hero-title {
+            font-size: clamp(3rem, 6vw, 5.5rem);
+            font-weight: 600;
+            line-height: 0.95;
+            letter-spacing: -0.04em;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .hero-sub {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 500px;
+            line-height: 1.5;
+        }
+
+        /* RUNNING TICKER */
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 0;
+            margin: 60px 0;
+            background: rgba(255,255,255,0.02);
+        }
+
+        .ticker {
+            display: flex;
+            white-space: nowrap;
+            animation: ticker 20s linear infinite;
+        }
+
+        .ticker-item {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-right: 40px;
+            text-transform: uppercase;
+        }
+
+        @keyframes ticker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* MASONRY GRID */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: minmax(180px, auto);
+            gap: 16px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .card-link::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 10;
+        }
+
+        .card:hover {
+            border-color: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+            z-index: 2;
+        }
+
+        /* SPOTLIGHT EFFECT */
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.06), transparent 40%);
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.4s;
+            pointer-events: none;
+        }
+        .card:hover::before { opacity: 1; }
+        .card > * { position: relative; z-index: 2; } 
+
+        /* GRID SPANS */
+        .col-2 { grid-column: span 2; }
+        .col-3 { grid-column: span 3; }
+        .col-4 { grid-column: span 4; }
+        .row-2 { grid-row: span 2; }
+
+        @media (max-width: 1024px) {
+            .grid { grid-template-columns: repeat(2, 1fr); }
+            .col-3, .col-4 { grid-column: span 2; }
+        }
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: 1fr; }
+            .col-2, .col-3, .col-4 { grid-column: span 1; }
+        }
+
+        /* CARD CONTENT STYLES */
+        .card-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            font-weight: 500;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        p {
+            font-size: 0.95rem;
+            color: #999;
+            line-height: 1.5;
+        }
+
+        /* SPECIAL CARDS */
+        .stat-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .big-number {
+            font-size: 4.5rem;
+            font-weight: 700;
+            line-height: 1;
+            background: linear-gradient(to bottom right, #fff, #666);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .location-dot {
+            width: 8px; height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #22c55e;
+            display: inline-block;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        .tech-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        .pill {
+            background: rgba(255,255,255,0.05);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: #d4d4d4;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* BUTTONS */
+        .action-area {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            z-index: 20; 
+            position: relative;
+        }
+
+        .btn-primary, .btn-secondary {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: #fff;
+            color: #000;
+            font-weight: 600;
+        }
+        .btn-primary:hover { background: #e0e0e0; }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.15); }
+
+        .btn-arrow {
+            width: 40px; height: 40px;
+            background: #fff;
+            color: #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            bottom: 24px; right: 24px;
+            transition: 0.2s;
+        }
+        .card:hover .btn-arrow { transform: scale(1.1) rotate(-45deg); }
+
+        /* BRAND DOTS */
+        .vk-dot { display:inline-block; width:10px; height:10px; border-radius:50%; background:#0077FF; margin-right:8px; }
+        .ya-dot { display:inline-block; width:10px; height:10px; border-radius:50%; background:#FC3F1D; margin-right:8px; }
+        .ohsc-dot { display:inline-block; width:10px; height:10px; border-radius:50%; background:#7F055F; margin-right:8px; } /* Oxford Plum */
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header>
+            <div class="brand">ARIAN SEMENOV / АРИАН СЕМЕНОВ</div>
+            <div style="text-align: right;">
+                <div class="card-label">CURRENT STATUS</div>
+                <div style="color: #fff; font-size: 0.9rem;">
+                    <span class="location-dot"></span>Open to Internships
+                </div>
+            </div>
+        </header>
+
+        <div class="hero">
+            <h1 class="hero-title">Engineering Logic.<br>Creative Code.</h1>
+            <p class="hero-sub">
+                Студент 1 курса ИИКС МИФИ (Программная инженерия Искусственного Интеллекта SE AI).
+            </p>
+        </div>
+
+    </div>
+
+    <!-- TICKER -->
+    <div class="ticker-wrap">
+        <div class="ticker">
+            <div class="ticker-item">/// SOFTWARE ENGINEERING</div>
+            <div class="ticker-item">/// AI SYSTEMS</div>
+            <div class="ticker-item">/// C++ DEVELOPMENT</div>
+            <div class="ticker-item">/// PYTHON BACKEND</div>
+            <div class="ticker-item">/// OPENGL GRAPHICS</div>
+            <div class="ticker-item">/// IOT & HARDWARE</div>
+            <!-- Duplicate for loop -->
+            <div class="ticker-item">/// SOFTWARE ENGINEERING</div>
+            <div class="ticker-item">/// AI SYSTEMS</div>
+            <div class="ticker-item">/// C++ DEVELOPMENT</div>
+            <div class="ticker-item">/// PYTHON BACKEND</div>
+            <div class="ticker-item">/// OPENGL GRAPHICS</div>
+            <div class="ticker-item">/// IOT & HARDWARE</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="grid" id="grid">
+
+            <!-- 1. EDUCATION (Wide) -->
+            <div class="card col-2">
+                <div>
+                    <span class="card-label">EDUCATION</span>
+                    <h3>MEPhI University</h3>
+                    <p>Институт интеллектуальных кибернетических систем (ИИКС).<br>
+                    <span style="color:#fff;">B.S. Software Engineering for AI (SE AI)</span></p>
+                </div>
+                <div style="margin-top: 20px;">
+                    <div class="pill" style="display:inline-block">1st Year Student</div>
+                    <div class="pill" style="display:inline-block">2025 — Present</div>
+                </div>
+            </div>
+
+            <!-- 2. LOCATION (Small) -->
+            <div class="card">
+                <div>
+                    <span class="card-label">BASE</span>
+                    <h3>Moscow, RU</h3>
+                </div>
+                <div style="height: 60px; display:flex; align-items:end;">
+                    <span style="font-size:3rem; color:#333;">UTC+3</span>
+                </div>
+            </div>
+
+            <!-- 3. GITHUB (Small) -->
+            <a href="https://github.com/ArianVangle" target="_blank" class="card" style="text-decoration:none;">
+                <div style="height:100%; display:flex; flex-direction:column; justify-content:space-between;">
+                    <span class="card-label">CODE</span>
+                    <h3>GitHub Profile</h3>
+                    <div style="display:flex; gap:4px; align-items:end; height:30px;">
+                        <div style="width:6px; height:10px; background:#333; border-radius:2px;"></div>
+                        <div style="width:6px; height:20px; background:#224422; border-radius:2px;"></div>
+                        <div style="width:6px; height:15px; background:#22c55e; border-radius:2px;"></div>
+                        <div style="width:6px; height:25px; background:#14522d; border-radius:2px;"></div>
+                        <div style="width:6px; height:18px; background:#22c55e; border-radius:2px;"></div>
+                    </div>
+                    <div class="btn-arrow">→</div>
+                </div>
+            </a>
+
+            <!-- 4. SMART HOME (Large Vertical) -->
+            <div class="card row-2 col-2">
+                <span class="card-label">FLAGSHIP PROJECT</span>
+                <div>
+                    <h3 style="font-size: 2rem;">Smart Home & Voice Assistant</h3>
+                    <p style="margin-top: 15px;">
+                        Полноценная экосистема умного дома, разработанная с нуля. 
+                        Включает аппаратную часть (датчики), сервер обработки данных (Python) и веб-интерфейс.
+                    </p>
+                    <ul style="margin-top: 20px; padding-left: 20px; color: #999; font-size: 0.95rem; line-height: 1.8; margin-bottom: 30px;">
+                        <li>Голосовое управление на Python</li>
+                        <li>Веб-дашборд с показателями датчиков</li>
+                        <li>Интеграция IoT модулей (ESP8266/Arduino)</li>
+                    </ul>
+                    
+                    <div class="action-area">
+                        <a href="https://arianvangle.github.io/smart_home/" target="_blank" class="btn-primary">
+                            <span>Open Live Demo</span> ↗
+                        </a>
+                        <a href="https://github.com/ArianVangle/voice_assistant_and_smart_home/tree/main" target="_blank" class="btn-secondary">
+                            View Code
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="tech-list" style="margin-top: 30px;">
+                    <span class="pill">C++ (Embedded)</span>
+                    <span class="pill">Python</span>
+                    <span class="pill">IoT</span>
+                    <span class="pill">GitHub Pages</span>
+                </div>
+            </div>
+
+            <!-- 5. VK EDUCATION (Certification) -->
+            <div class="card col-2">
+                <span class="card-label"><span class="vk-dot"></span>CERTIFICATION</span>
+                <h3>VK Education: NLP & LLM</h3>
+                <p>Курс «Современный NLP: Большие языковые модели». Архитектура трансформеров, RAG, Fine-tuning и работа с эмбеддингами.</p>
+                <div class="tech-list">
+                    <span class="pill">Transformers</span>
+                    <span class="pill">PyTorch</span>
+                </div>
+            </div>
+
+            <!-- 6. YANDEX ALGORITHMS (Certification) -->
+            <div class="card col-2">
+                <span class="card-label"><span class="ya-dot"></span>CERTIFICATION</span>
+                <h3>Yandex Algorithms Training</h3>
+                <p>Интенсив по алгоритмам и структурам данных. Графы (DFS/BFS), динамическое программирование, деревья отрезков.</p>
+                <div class="tech-list">
+                    <span class="pill">Algorithms</span>
+                    <span class="pill">Data Structures</span>
+                </div>
+            </div>
+
+            <!-- 7. OXFORD HOME STUDY (Global Certification) -->
+            <div class="card col-2">
+                <span class="card-label"><span class="ohsc-dot"></span>GLOBAL CERTIFICATION</span>
+                <h3>Oxford Home Study Centre</h3>
+                <p>Курс Machine Learning (Online). Фундаментальные основы машинного обучения, теория вероятностей, нейронные сети и анализ данных.</p>
+                <div class="tech-list">
+                    <span class="pill">Machine Learning</span>
+                    <span class="pill">Math Analysis</span>
+                    <span class="pill">English</span>
+                </div>
+            </div>
+
+            <!-- 8. EXAM SCORE (Stat) -->
+            <div class="card stat-card">
+                <span class="card-label">ACHIEVEMENT</span>
+                <div class="big-number">100</div>
+                <p>Баллов ЕГЭ по Информатике 2025.</p>
+            </div>
+            <!-- JUNIOR COMPETITION CARD -->
+            
+
+            <!-- 9. FRONTEND (Language Card) -->
+            <div class="card">
+                <span class="card-label">FRONTEND</span>
+                <h3>Web Stack</h3>
+                <p style="margin-bottom: 10px;">Modern UI & Interfaces</p>
+                <div class="tech-list">
+                    <span class="pill">JavaScript</span>
+                    <span class="pill">HTML5</span>
+                    <span class="pill">CSS3</span>
+                </div>
+            </div>
+
+            <!-- 10. PYTHON (Language Card) -->
+            <div class="card col-2">
+                <span class="card-label">BACKEND & ML</span>
+                <h3>Python Ecosystem</h3>
+                <div class="tech-list" style="margin-top: 10px;">
+                    <span class="pill">FastAPI</span>
+                    <span class="pill">Scikit-Learn</span>
+                    <span class="pill">Pandas</span>
+                    <span class="pill">NumPy</span>
+                </div>
+            </div>
+            
+            <!-- 11. C++ (Language Card) -->
+            <div class="card col-2">
+                <span class="card-label">SYSTEM & GRAPHICS</span>
+                <h3>C/C++ Core</h3>
+                <div class="tech-list" style="margin-top: 10px;">
+                    <span class="pill">STL</span>
+                    <span class="pill">OpenGL</span>
+                    <span class="pill">CMake</span>
+                    <span class="pill">Memory Mgmt</span>
+                </div>
+            </div>
+            <div class="card col-2">
+                <span class="card-label">AWARD & RECOGNITION</span>
+                <h3>Winner: "Junior" Contest</h3>
+                <p>Призер Всероссийского конкурса научных работ школьников «Юниор». Представил исследовательский проект Голосовой помощник и умный дом.</p>
+                <div class="tech-list">
+                    <span class="pill">Scientific Research</span>
+                    <span class="pill">Engineering</span>
+                </div>
+            </div>
+            <div class="card col-2">
+                <span class="card-label">R&D PROJECT | AI</span>
+                <h3>Multi-Agent Systems</h3>
+                <p>Проект <strong>DocuAI</strong>. Разработка системы оркестрации агентов для анализа технической документации и генерации целевой рекламы на ее основе. Автоматическое извлечение данных и классификация контента.</p>
+                <div class="tech-list">
+                                        <span class="pill">python</span>
+                    <span class="pill">langchain</span>
+                    <span class="pill">LLM Agents</span>
+                    <span class="pill">API</span>
+            </div>
+            <div class="action-area">
+                <a href="https://github.com/ArianVangle/docuai" target="_blank" class="btn-secondary">
+                    View Repo
+                </a>
+    </div>
+</div>
+
+
+        </div>
+    </div>
+
+    <script>
+        // JS для отслеживания мыши (Spotlight Effect)
+        const grid = document.getElementById("grid");
+        const cards = document.querySelectorAll(".card");
+
+        grid.onmousemove = e => {
+            for(const card of cards) {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                card.style.setProperty("--mouse-x", `${x}px`);
+                card.style.setProperty("--mouse-y", `${y}px`);
+            }
+        };
+    </script>
+</body>
+</html>
